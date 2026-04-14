@@ -4,12 +4,57 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>since sidd happened</title>
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='80' font-size='70' font-family='monospace' fill='white'>SD</text></svg>">
 <style>
   * { margin: 0; padding: 0; box-sizing: border-box; }
 
+  :root {
+    --bg: #000;
+    --fg: #fff;
+    --fg-dim: #ccc;
+    --fg-muted: #888;
+    --fg-faint: #666;
+    --fg-ghost: #555;
+    --fg-hidden: #333;
+    --fg-invisible: #222;
+    --border: #222;
+    --border-dim: #333;
+    --hover-bg: #0a0a0a;
+    --overlay-bg: rgba(0, 0, 0, 0.85);
+    --panel-bg: #000;
+    --pw-border: #1a1a1a;
+    --pw-color: #222;
+    --pw-hover-border: #333;
+    --pw-hover-color: #444;
+    --delete-hover-border: #600;
+    --delete-hover-color: #f44;
+  }
+
+  :root.light {
+    --bg: #fff;
+    --fg: #000;
+    --fg-dim: #333;
+    --fg-muted: #666;
+    --fg-faint: #888;
+    --fg-ghost: #aaa;
+    --fg-hidden: #bbb;
+    --fg-invisible: #ddd;
+    --border: #ddd;
+    --border-dim: #ccc;
+    --hover-bg: #f5f5f5;
+    --overlay-bg: rgba(255, 255, 255, 0.85);
+    --panel-bg: #fff;
+    --pw-border: #e0e0e0;
+    --pw-color: #ccc;
+    --pw-hover-border: #bbb;
+    --pw-hover-color: #999;
+    --delete-hover-border: #fcc;
+    --delete-hover-color: #c00;
+  }
+
   body {
-    background: #000;
-    color: #fff;
+    background: var(--bg);
+    color: var(--fg);
     font-family: 'SF Mono', 'Menlo', 'Monaco', 'Cascadia Code', 'Consolas', monospace;
     font-size: 14px;
     min-height: 100vh;
@@ -18,11 +63,12 @@
     align-items: center;
     padding: 40px 20px 80px;
     -webkit-font-smoothing: antialiased;
+    transition: background 0.3s, color 0.3s;
   }
 
   .site-title {
     font-size: 13px;
-    color: #fff;
+    color: var(--fg);
     letter-spacing: 2px;
     margin-bottom: 32px;
     text-transform: lowercase;
@@ -39,8 +85,8 @@
 
   .cal-header button {
     background: none;
-    border: 1px solid #333;
-    color: #fff;
+    border: 1px solid var(--border-dim);
+    color: var(--fg);
     font-family: inherit;
     font-size: 14px;
     padding: 6px 12px;
@@ -48,7 +94,7 @@
     transition: border-color 0.2s;
   }
 
-  .cal-header button:hover { border-color: #888; }
+  .cal-header button:hover { border-color: var(--fg-muted); }
 
   .cal-title {
     font-size: 16px;
@@ -62,25 +108,25 @@
   .cal-grid {
     display: grid;
     grid-template-columns: repeat(7, 1fr);
-    border-top: 1px solid #222;
-    border-left: 1px solid #222;
+    border-top: 1px solid var(--border);
+    border-left: 1px solid var(--border);
     width: 100%;
     max-width: 700px;
   }
 
   .cal-day-label {
-    border-right: 1px solid #222;
-    border-bottom: 1px solid #222;
+    border-right: 1px solid var(--border);
+    border-bottom: 1px solid var(--border);
     padding: 10px;
     text-align: center;
     font-size: 11px;
-    color: #555;
+    color: var(--fg-ghost);
     letter-spacing: 1px;
   }
 
   .cal-cell {
-    border-right: 1px solid #222;
-    border-bottom: 1px solid #222;
+    border-right: 1px solid var(--border);
+    border-bottom: 1px solid var(--border);
     padding: 10px;
     min-height: 70px;
     cursor: pointer;
@@ -88,17 +134,17 @@
     position: relative;
   }
 
-  .cal-cell:hover { background: #0a0a0a; }
+  .cal-cell:hover { background: var(--hover-bg); }
   .cal-cell.empty { cursor: default; }
   .cal-cell.empty:hover { background: none; }
 
   .cal-cell .day-num {
     font-size: 12px;
-    color: #666;
+    color: var(--fg-faint);
   }
 
   .cal-cell.today .day-num {
-    color: #fff;
+    color: var(--fg);
   }
 
   .cal-cell.has-entry .day-num {
@@ -107,7 +153,7 @@
     justify-content: center;
     width: 24px;
     height: 24px;
-    border: 1px solid #fff;
+    border: 1px solid var(--fg);
     border-radius: 50%;
   }
 
@@ -116,7 +162,7 @@
     display: none;
     position: fixed;
     inset: 0;
-    background: rgba(0, 0, 0, 0.85);
+    background: var(--overlay-bg);
     z-index: 100;
     justify-content: center;
     align-items: center;
@@ -126,8 +172,8 @@
   .overlay.open { display: flex; }
 
   .entry-panel {
-    background: #000;
-    border: 1px solid #222;
+    background: var(--panel-bg);
+    border: 1px solid var(--border);
     width: 100%;
     max-width: 600px;
     max-height: 80vh;
@@ -140,18 +186,18 @@
     justify-content: space-between;
     align-items: center;
     padding: 16px 20px;
-    border-bottom: 1px solid #222;
+    border-bottom: 1px solid var(--border);
   }
 
   .entry-date {
     font-size: 13px;
-    color: #888;
+    color: var(--fg-muted);
   }
 
   .entry-close {
     background: none;
     border: none;
-    color: #555;
+    color: var(--fg-ghost);
     font-family: inherit;
     font-size: 18px;
     cursor: pointer;
@@ -159,7 +205,7 @@
     transition: color 0.2s;
   }
 
-  .entry-close:hover { color: #fff; }
+  .entry-close:hover { color: var(--fg); }
 
   .entry-body {
     padding: 20px;
@@ -167,12 +213,12 @@
     flex: 1;
     line-height: 1.7;
     white-space: pre-wrap;
-    color: #ccc;
+    color: var(--fg-dim);
     font-size: 13px;
   }
 
   .entry-body.empty {
-    color: #333;
+    color: var(--fg-hidden);
     font-style: italic;
   }
 
@@ -188,8 +234,8 @@
 
   .entry-editor textarea {
     flex: 1;
-    background: #000;
-    color: #ccc;
+    background: var(--panel-bg);
+    color: var(--fg-dim);
     border: none;
     padding: 20px;
     font-family: inherit;
@@ -199,20 +245,20 @@
     outline: none;
   }
 
-  .entry-editor textarea::placeholder { color: #333; }
+  .entry-editor textarea::placeholder { color: var(--fg-hidden); }
 
   .entry-actions {
     display: flex;
     gap: 8px;
     padding: 12px 20px;
-    border-top: 1px solid #222;
+    border-top: 1px solid var(--border);
     justify-content: flex-end;
   }
 
   .entry-actions button {
     background: none;
-    border: 1px solid #333;
-    color: #888;
+    border: 1px solid var(--border-dim);
+    color: var(--fg-muted);
     font-family: inherit;
     font-size: 12px;
     padding: 6px 16px;
@@ -221,17 +267,17 @@
   }
 
   .entry-actions button:hover {
-    border-color: #888;
-    color: #fff;
+    border-color: var(--fg-muted);
+    color: var(--fg);
   }
 
   .entry-actions .save-btn:hover {
-    border-color: #fff;
+    border-color: var(--fg);
   }
 
   .entry-actions .delete-btn:hover {
-    border-color: #600;
-    color: #f44;
+    border-color: var(--delete-hover-border);
+    color: var(--delete-hover-color);
   }
 
   /* Password tab */
@@ -244,8 +290,8 @@
 
   .pw-toggle {
     background: none;
-    border: 1px solid #1a1a1a;
-    color: #222;
+    border: 1px solid var(--pw-border);
+    color: var(--pw-color);
     font-family: inherit;
     font-size: 10px;
     padding: 4px 10px;
@@ -254,13 +300,13 @@
   }
 
   .pw-toggle:hover {
-    border-color: #333;
-    color: #444;
+    border-color: var(--pw-hover-border);
+    color: var(--pw-hover-color);
   }
 
   .pw-toggle.authed {
-    border-color: #222;
-    color: #444;
+    border-color: var(--border);
+    color: var(--pw-hover-color);
   }
 
   .pw-input-wrap {
@@ -271,9 +317,9 @@
   .pw-input-wrap.open { display: block; }
 
   .pw-input {
-    background: #000;
-    border: 1px solid #222;
-    color: #fff;
+    background: var(--panel-bg);
+    border: 1px solid var(--border);
+    color: var(--fg);
     font-family: inherit;
     font-size: 12px;
     padding: 6px 10px;
@@ -281,15 +327,38 @@
     outline: none;
   }
 
-  .pw-input::placeholder { color: #333; }
+  .pw-input::placeholder { color: var(--fg-hidden); }
+
+  /* Theme toggle */
+  .theme-toggle {
+    position: fixed;
+    bottom: 16px;
+    left: 16px;
+    background: none;
+    border: 1px solid var(--pw-border);
+    color: var(--pw-color);
+    font-family: inherit;
+    font-size: 14px;
+    padding: 4px 8px;
+    cursor: pointer;
+    transition: all 0.3s;
+    z-index: 50;
+  }
+
+  .theme-toggle:hover {
+    border-color: var(--pw-hover-border);
+    color: var(--pw-hover-color);
+  }
 
   /* Scrollbar */
   ::-webkit-scrollbar { width: 4px; }
-  ::-webkit-scrollbar-track { background: #000; }
-  ::-webkit-scrollbar-thumb { background: #222; }
+  ::-webkit-scrollbar-track { background: var(--bg); }
+  ::-webkit-scrollbar-thumb { background: var(--border); }
 </style>
 </head>
 <body>
+
+<button class="theme-toggle" id="themeToggle" onclick="toggleTheme()">&#9790;</button>
 
 <div class="site-title">since sidd happened</div>
 
@@ -518,10 +587,26 @@ function checkPw(e) {
   }
 }
 
+function toggleTheme() {
+  const root = document.documentElement;
+  const isLight = root.classList.toggle('light');
+  localStorage.setItem('journal_theme', isLight ? 'light' : 'dark');
+  document.getElementById('themeToggle').innerHTML = isLight ? '&#9728;' : '&#9790;';
+}
+
+function loadTheme() {
+  const saved = localStorage.getItem('journal_theme');
+  if (saved === 'light') {
+    document.documentElement.classList.add('light');
+    document.getElementById('themeToggle').innerHTML = '&#9728;';
+  }
+}
+
 document.addEventListener('keydown', e => {
   if (e.key === 'Escape') closeEntry();
 });
 
+loadTheme();
 init();
 </script>
 </body>
