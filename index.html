@@ -604,8 +604,26 @@ document.addEventListener('keydown', e => {
   if (e.key === 'Escape') closeEntry();
 });
 
+async function migrateLocalStorage() {
+  try {
+    const raw = localStorage.getItem('journal_entries');
+    if (!raw) return;
+    const local = JSON.parse(raw);
+    const dates = Object.keys(local).filter(k => local[k] && local[k].trim());
+    if (dates.length === 0) return;
+    for (const date of dates) {
+      await fetch('/api/entries', {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ password: PW, date, content: local[date] }),
+      });
+    }
+    localStorage.removeItem('journal_entries');
+  } catch {}
+}
+
 loadTheme();
-init();
+migrateLocalStorage().then(() => init());
 </script>
 </body>
 </html>
