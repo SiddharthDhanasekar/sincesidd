@@ -408,21 +408,23 @@ const PW = 'lego240706';
 let currentYear, currentMonth;
 let authenticated = false;
 let selectedDate = null;
+let entriesCache = {};
 
-function init() {
+async function init() {
   const now = new Date();
   currentYear = now.getFullYear();
   currentMonth = now.getMonth();
+  await fetchEntries();
   render();
 }
 
-function getEntries() {
-  try { return JSON.parse(localStorage.getItem('journal_entries') || '{}'); }
-  catch { return {}; }
-}
-
-function setEntries(entries) {
-  localStorage.setItem('journal_entries', JSON.stringify(entries));
+async function fetchEntries() {
+  try {
+    const res = await fetch('/api/entries');
+    entriesCache = await res.json();
+  } catch {
+    entriesCache = {};
+  }
 }
 
 function dateKey(y, m, d) {
@@ -436,7 +438,6 @@ function render() {
   const grid = document.getElementById('calGrid');
   grid.innerHTML = '';
 
-  // Day labels
   DAYS.forEach(d => {
     const el = document.createElement('div');
     el.className = 'cal-day-label';
@@ -446,22 +447,19 @@ function render() {
 
   const firstDay = new Date(currentYear, currentMonth, 1).getDay();
   const daysInMonth = new Date(currentYear, currentMonth + 1, 0).getDate();
-  const entries = getEntries();
   const today = new Date();
 
-  // Empty cells before first day
   for (let i = 0; i < firstDay; i++) {
     const el = document.createElement('div');
     el.className = 'cal-cell empty';
     grid.appendChild(el);
   }
 
-  // Day cells
   for (let d = 1; d <= daysInMonth; d++) {
     const el = document.createElement('div');
     const key = dateKey(currentYear, currentMonth, d);
     const isToday = today.getFullYear() === currentYear && today.getMonth() === currentMonth && today.getDate() === d;
-    const hasEntry = entries[key] && entries[key].trim().length > 0;
+    const hasEntry = entriesCache[key] && entriesCache[key].trim().length > 0;
 
     el.className = 'cal-cell' + (isToday ? ' today' : '') + (hasEntry ? ' has-entry' : '');
     el.innerHTML = `<span class="day-num">${d}</span>`;
@@ -469,7 +467,6 @@ function render() {
     grid.appendChild(el);
   }
 
-  // Fill remaining cells to complete the grid
   const totalCells = firstDay + daysInMonth;
   const remainder = totalCells % 7;
   if (remainder !== 0) {
@@ -490,8 +487,7 @@ function changeMonth(delta) {
 
 function openDay(y, m, d) {
   selectedDate = dateKey(y, m, d);
-  const entries = getEntries();
-  const content = entries[selectedDate] || '';
+  const content = entriesCache[selectedDate] || '';
 
   const dateObj = new Date(y, m, d);
   document.getElementById('entryDate').textContent =
@@ -534,25 +530,27 @@ function closeOverlay(e) {
   if (e.target === document.getElementById('overlay')) closeEntry();
 }
 
-function saveEntry() {
+async function saveEntry() {
   if (!authenticated || !selectedDate) return;
   const text = document.getElementById('entryTextarea').value;
-  const entries = getEntries();
-  if (text.trim()) {
-    entries[selectedDate] = text;
-  } else {
-    delete entries[selectedDate];
-  }
-  setEntries(entries);
+  await fetch('/api/entries', {
+    method: 'PUT',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ password: PW, date: selectedDate, content: text }),
+  });
+  await fetchEntries();
   closeEntry();
   render();
 }
 
-function deleteEntry() {
+async function deleteEntry() {
   if (!authenticated || !selectedDate) return;
-  const entries = getEntries();
-  delete entries[selectedDate];
-  setEntries(entries);
+  await fetch('/api/entries', {
+    method: 'DELETE',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ password: PW, date: selectedDate }),
+  });
+  await fetchEntries();
   closeEntry();
   render();
 }
